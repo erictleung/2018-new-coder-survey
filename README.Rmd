@@ -1,0 +1,33 @@
+---
+title: "Cleaning freeCodeCamp's 2018 New Coder Survey Data"
+author: "Eric Leung"
+date: 2018-09-01
+output:
+  md_document:
+    variant: markdown_github
+---
+
+**Contents**
+
+- [Introduction](#introduction)
+
+## Introduction
+
+## Prerequisites
+
+- R (>= 3.5.0)
+- tidyverse
+
+## Useage
+
+To reproduce data download and cleaning, run the following.
+
+```sh
+# Download raw data
+make download
+
+# Perform cleaning and munging
+make cleaning
+```
+
+## Repository Structure
