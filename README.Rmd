@@ -10,6 +10,9 @@ output:
 **Contents**
 
 - [Introduction](#introduction)
+- [Prerequisites](#prerequisites)
+- [Usage](#usage)
+- [Repository Structure](#repository-structure)
 
 ## Introduction
 
@@ -18,13 +21,16 @@ output:
 - R (>= 3.5.0)
 - tidyverse
 
-## Useage
+## Usage
 
 To reproduce data download and cleaning, run the following.
 
 ```sh
 # Download raw data
 make download
+
+# Create exploratory data analysis report
+make eda
 
 # Perform cleaning and munging
 make cleaning
