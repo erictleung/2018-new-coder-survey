@@ -14,6 +14,10 @@ eda :
 clean :
 	Rscript src/clean-data-2018.R
 
+## readme : Compile RMarkdown README
+readme :
+	Rscript -e 'rmarkdown::render(here::here("README.Rmd"), output_file = here::here("README.md"))'
+
 ## help : Help page for Makefile
 help :
 	@echo ""
