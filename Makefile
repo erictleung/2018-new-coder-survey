@@ -8,7 +8,7 @@ raw :
 ## eda : Run exploratory data analysis on raw data
 eda :
 	mkdir -p docs
-	Rscript -e 'rmarkdown::render("reports/explore-data.Rmd", output_file = "docs/explore-data.md")'
+	Rscript -e 'rmarkdown::render(here::here("reports", "explore-data.Rmd"), output_file = here::here("docs", "explore-data.html"))'
 
 ## clean : Clean and format raw data
 clean :
@@ -17,6 +17,7 @@ clean :
 ## readme : Compile RMarkdown README
 readme :
 	Rscript -e 'rmarkdown::render(here::here("README.Rmd"), output_file = here::here("README.md"))'
+	rm README.html
 
 ## tree : Create repository structure for README
 tree :
