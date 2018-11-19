@@ -18,6 +18,10 @@ clean :
 readme :
 	Rscript -e 'rmarkdown::render(here::here("README.Rmd"), output_file = here::here("README.md"))'
 
+## tree : Create repository structure for README
+tree :
+	tree >> README.Rmd
+
 ## help : Help page for Makefile
 help :
 	@echo ""
