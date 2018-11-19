@@ -2,8 +2,310 @@
 title: Exploratory Data Analysis of Survey Data
 author: Eric Leung
 date: 2018-09-12
+output:
+  html_notebook:
+    toc: true
+    toc_float: true
 ---
 
 # Overview
 
+This report serves as an initial look at freeCodeCamp's 2018 New Coder Survey
+data.
+
+This data has not been pre-processed in any way. Thus, this report also serves
+to explore necessary pre-processing to clean the data.
+
+In exploring possible pre-processing steps, I will try to create thresholds and
+rules on filtering out data that I find disingenuous for the sake of keeping
+the integrity of the data high. So possible reasons for removing a row (i.e. a
+unique survey submission from the final dataset) are
+
+- Extremely high or low answers
+- Submitting irrelevant answers
+
 **Last Updated**: `r date()`
+
+
+# Load Packages
+
+```{r Load Packages}
+# General help on manipulating data and visualize
+library(tidyverse)
+library(here)
+
+# More specialized exploration tools
+library(Hmisc)
+```
+
+
+# Read in Data
+
+Let's read in the data.
+
+```{r Read in Data}
+# Read in data
+raw_data_path <- here("raw-data", "2018-New-Coders-Survey.csv")
+raw_data <- read_csv(raw_data_path)
+
+# Explore dimensions
+data_dim <- dim(raw_data)
+```
+
+Just a general check, there were **`r data_dim[1]` rows** and **`r data_dim[2]`
+columns** in the raw data.
+
+# Remove Basic Columns
+
+Here, let's remove some columns we know will not be useful in the final dataset.
+
+- Unique ID (unnecessary in the final dataset as we'll assume each row is
+  independent individual)
+
+This variable is encoded with the `#` symbol.
+
+```{r}
+# Remove unique ID column
+raw_data <- raw_data %>% select(-"#")
+```
+
+
+# Explore Data
+
+## Initial Overview
+
+With all the data of interest at hand, let's do a very simple exploration of
+the data using the `Hmisc` function `describe()`.
+
+This function goes through each variable and gives a summary that is data-type
+specific.
+
+```{r Start to Explore Data}
+# Basic overview of the data
+Hmisc::describe(raw_data)
+```
+
+From this output, here are some notes about the data that will have to be
+addressed in the pre-processing step.
+
+- For lots of the data, it was encoded as a `1` or `0`, when it really should
+  have been a boolean value `TRUE` or `FALSE`. Here are the columns that need
+  this treatment.
+    - "Are you already working as a software developer?"
+    - "Is this your first software development job?"
+    - "Are you willing to relocate for a job?"
+    - "Have you attended a full-time coding bootcamp?"
+    - "Have you finished yet?"
+    - "Did you take a loan to pay for the bootcamp?"
+    - "Based on your experience, would you recommend this bootcamp to your
+      friends?"
+    - "Are you an ethnic minority in your country?"
+    - "Do you financially support any dependents?"
+    - "Do you have children?"
+    - "Do you financially support any elderly relatives or relatives with
+      disabilities?"
+    - "Do you have any debt?"
+    - "Do you have a home mortgage?"
+    - "Do you have student loan debt?"
+    - "Do you consider yourself under-employed?"
+    - "Have you served in your country's military before?"
+    - "Do you receive disability benefits from your government?"
+    - "Do you have high speed internet at your home?"
+- The column on "Before you got this job, how many months did you spend looking
+  for a job?" has some suspicious values e.g. 200 months = 16 years.
+- Need to rename job preference to be the appropriate column label
+- Need to re-code job preferences to be boolean, not just the string itself
+- Need to explore and normalize (sanity check) the "Other" category for job
+  preferences and group them accordingly
+- There are some very high salary estimates for a first developer job that need
+  further looking into
+  encoding
+- Search through the "Other" reasons on wanting to code and normalize them
+  accordingly.
+- The online resources need to be recoded into sensible column variables and
+  their values need to be boolean as well
+- The "Other" answers for online resources need to be checked and text
+  normalized
+- Coding resource also needs to be recoded with sensible column variables and
+  values
+- The "Other" answers for coding resources needs to be text normalized
+- The coding podcasts and "Other" answers need to be normalized and recoded
+  accordingly
+- The YouTube channel and "Other" answers need to be normalized and recoded
+  accordingly
+- The number of hours you spend learning each week needs to have a threshold as
+  people put they have spent all 168 hours in a week studying. A sensible
+  number *might* be around 126 hours (given 6 hours of sleep everyday)
+- The number of months spent programming needs to be looked at and have a
+  threshold
+  because some people claim to have programmed for 55 years.
+- Money spent on coding needs to have a threshold and checked because of
+  possible extreme values
+- Check age distribution for outliers (e.g. someone is 250 years old)
+- Check values for "Other" genders for irrelevant answers and text normalize if
+  necessary
+- Find threshold for number of children (e.g. someone claims to have 100
+  children) so a sensible number may be up to 7
+- Check debt owed for a home mortgage, there are some extreme values
+- Check debt owed for student debt, there are some extreme values
+- Check values for "Other" in current employment situation, there may be some
+  irrelevant values
+- Check money made last year, there are some extreme values
+- Check average time of survey completion for curiosity
+
+
+## Column Specific Checks
+
+After getting a brief overview of the data, let's take a look at some of the
+individual columns that were flagged in the previous section.
+
+### Number of months spent looking for a job
+
+```{r}
+month_quantiles <- raw_data %>%
+    select(`Before you got this job, how many months did you spend looking for a job?`) %>%
+    pull() %>%
+    quantile(probs = c(0.95, 0.99, 0.999, 0.9999, 1), na.rm = TRUE)
+month_quantiles
+```
+
+Looking at the above distribution, it looks like we may have to remove
+individuals (or at least investigate individuals) with months greater than
+`r month_quantiles[2]` months.
+
+
+### Check salary amounts
+
+As noted above, the extremes of estimated first developer job salary don't
+seem like they were from well-intentioned individuals. So here, let's take a
+look at the distribution more closely.
+
+```{r}
+
+```
+
+
+### Read some of the reasons why people want to learn how to code
+
+The "Other" category for the reason for wanting to code can be very
+interesting. Here, let's explore some of them and see if we have to worry about
+some of them being outliers.
+
+```{r}
+
+```
+
+
+### Check number of hours spent learning
+
+```{r}
+
+```
+
+
+### Check number of months programming
+
+```{r}
+
+```
+
+### Check month spent on programming outside of university
+
+```{r}
+
+```
+
+
+### Check distribution of ages
+
+```{r}
+
+```
+
+### Check other genders
+
+```{r}
+
+```
+
+
+### Check number of children
+
+```{r}
+
+```
+
+
+### Check debt owed for home mortgage
+
+```{r}
+
+```
+
+
+### Check debt owed for student debt
+
+```{r}
+
+```
+
+
+### Check "Other" answer for employment status
+
+```{r}
+
+```
+
+
+### Check how much money made last year
+
+```{r}
+
+```
+
+
+### Check distribution of survey completion times
+
+```{r}
+
+```
+
+
+# Check Outlier Rich Columns
+
+There are some columns that had values quite extreme from everyone else. Here,
+let's clump all of those columns together to see if there are any patterns.
+
+```{r}
+
+```
+
+
+# Check Empty Rows
+
+Some entries to the survey may have not be serious. In other words, these
+individuals may have filled most of the survey but then left the rest of it
+blank. Here, I test my hypothesis that there are such people.
+
+First we'll need to calculate how sparse each of the rows are. This should be a
+simple count the number of `NA` values for each column, with respect to the
+total number of columns.
+
+```{r Check Sparse Rows}
+# Calculate sparsity of rows
+
+```
+
+With the proportion of `NA` values in each row, let us visualize this to get a
+better feel of the level of sparsity we're dealing with.
+
+```{r}
+# Plot distribution of completeness of rows
+```
+
+
+# Summary of Pre-Processing Data
+
+Here is a summary of what data pre-processing needs to be done.
+
+- Remove ages greater than 116 (and be skeptical of those around that age)
