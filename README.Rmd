@@ -2,9 +2,7 @@
 title: "Cleaning freeCodeCamp's 2018 New Coder Survey Data"
 author: "Eric Leung"
 date: 2018-09-01
-output:
-  md_document:
-    variant: markdown_github
+output: github_document
 ---
 
 **Contents**
@@ -34,6 +32,12 @@ make eda
 
 # Perform cleaning and munging
 make cleaning
+```
+
+## Session Information
+
+```{r}
+sessionInfo()
 ```
 
 ## Repository Structure
