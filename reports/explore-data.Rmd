@@ -159,6 +159,27 @@ addressed in the pre-processing step.
 After getting a brief overview of the data, let's take a look at some of the
 individual columns that were flagged in the previous section.
 
+### Specify Free Text Variables
+
+Here, let us specify the variables that had free text. This will allow us to
+identify rows/entries that had low effort or are irrelevant. These are
+specifically the non-numeric variables to make it easier to spot.
+
+```{r}
+free_text_cols <- c(
+  "Other",
+  "Other_1",
+  "Other_2",
+  "Other_3",
+  "Other_4",
+  "Other_5",
+  "Which one?",
+  "Other_6",
+  "Other_7"
+)
+```
+
+
 ### Number of months spent looking for a job
 
 ```{r}
@@ -174,16 +195,43 @@ individuals (or at least investigate individuals) with months greater than
 `r month_quantiles[2]` months.
 
 
-### Check salary amounts
+### Check expected salary amounts
+
+The question asked was
+
+> About how much money do you expect to earn per year at your first developer
+> job (in US Dollars)?
 
 As noted above, the extremes of estimated first developer job salary don't
 seem like they were from well-intentioned individuals. So here, let's take a
 look at the distribution more closely.
 
 ```{r}
-
+raw_data %>%
+  rename(money_expect = `About how much money do you expect to earn per year at your first developer job (in US Dollars)?`) %>%
+  select(money_expect) %>%
+  filter(!is.na(money_expect)) %>%
+  qplot(bins = 30,
+        xlab = "Expected Salary",
+        ylab = "Count",
+        main = "Distribution of Expected Job Salary")
 ```
 
+We see there is a number of individuals who are creating a large skew in the
+expected salary from a job.
+
+```{r}
+raw_data %>%
+  rename(money_expect = `About how much money do you expect to earn per year at your first developer job (in US Dollars)?`) %>%
+  filter(money_expect > 250000) %>%
+  select(money_expect, free_text_cols) %>%
+  arrange(desc(money_expect)) %>%
+  data.frame() %>%
+  describe()
+```
+
+There doesn't appear to be any irrelevant comments from these variables, so we
+can probably just leave this variable alone in cleaning.
 
 ### Read some of the reasons why people want to learn how to code
 
@@ -293,14 +341,60 @@ total number of columns.
 
 ```{r Check Sparse Rows}
 # Calculate sparsity of rows
-
+num_cols <- ncol(raw_data)
+sparsity_perc <- raw_data %>%
+  is.na() %>%
+  rowSums() / num_cols
+sparsity_perc %>% summary()
 ```
 
-With the proportion of `NA` values in each row, let us visualize this to get a
-better feel of the level of sparsity we're dealing with.
+Looking at these statistics, we can see that there are some rows with the
+majority of the columns are `NA` values. So we can probably remove these
+safely.
 
 ```{r}
-# Plot distribution of completeness of rows
+sparsity_perc %>% stem()
+```
+
+As a quick-and-dirty visualization, it looks like the majority of the entries
+are `NA` values, specifically around 70%. This could be because of lots of the
+multiple answer questions.
+
+But looking at this distribution, even the other extreme is suspicious, namely
+the very complete entries, where only 13% of the values are empty.
+
+# Distribution of Completion Times
+
+It might be interesting to look at the distribution of completion times. This
+can be valuable because individuals who finished really quickly, may have put
+down irrelevant answers that wouldn't be useful.
+
+```{r}
+completion_time <- raw_data %>%
+  select(`Submit Date (UTC)`, `Start Date (UTC)`) %>%
+  mutate(total_time_sec = `Submit Date (UTC)` - `Start Date (UTC)`) %>%
+  mutate(total_time_min = total_time_sec / 60) %>%
+  mutate(total_time_min = as.numeric(total_time_min))
+completion_time %>%
+  pull(total_time_min) %>%
+  stem()
+```
+
+There is just a few people who took a long time with this data, namely one
+individual who took
+`r (max_complete_time <- completion_time %>% select(total_time_min) %>% max)`
+minutes to finish, which equates to about
+`r max_complete_time / 60` hours to finish.
+
+There are also individuals who wanted to get through the survey as fast as
+possible.
+
+```{r}
+completion_time %>%
+  filter(total_time_min < 1) %>%
+  arrange(total_time_min) %>%
+  as.data.frame() %>%
+  head()
 ```
 
 
