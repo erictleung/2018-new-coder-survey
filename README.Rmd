@@ -34,6 +34,12 @@ make eda
 make cleaning
 ```
 
+## Exploratory Analysis
+
+You can find my exploratory analysis of the raw data [here][eda].
+
+[eda]: https://erictleung.com/2018-new-coder-survey/explore-data.nb.html
+
 ## Session Information
 
 ```{r}
