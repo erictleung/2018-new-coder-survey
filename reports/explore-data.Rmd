@@ -319,6 +319,20 @@ some of them being outliers.
 ```
 
 
+## Check Other Columns
+
+### Resources
+
+```{r}
+raw_data %>%
+  select(Other_2) %>%
+  filter(!is.na(Other_2)) %>%
+  count(Other_2) %>%
+  arrange()
+```
+
+
+
 # Check Outlier Rich Columns
 
 There are some columns that had values quite extreme from everyone else. Here,
