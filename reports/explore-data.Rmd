@@ -411,6 +411,13 @@ completion_time %>%
   head()
 ```
 
+```{r}
+completion_time %>%
+  filter(total_time_min > 100) %>%
+  arrange(total_time_min) %>%
+  as.data.frame() %>%
+  head()
+```
 
 # Summary of Pre-Processing Data
 
