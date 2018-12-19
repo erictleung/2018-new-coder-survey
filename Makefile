@@ -32,4 +32,6 @@ help :
 	@echo -e "------\t\t-----------"
 	@grep '## [A-Za-z]* : [A-Za-z]*' $(MAKEFILE_LIST) | sed 's/## //' | sed 's/: /\t\t/'
 
+.PHONY : raw eda clean readme tree
+
 .DEFAULT_GOAL := help
