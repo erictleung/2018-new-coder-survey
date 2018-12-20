@@ -1292,7 +1292,10 @@ main <- function(dataPath1, dataPath2) {
   # Rename variables with easier names
   renamed_data = rename_data_vars(dat)
 
-  # Change variables to boolean
+  # Change variables (jobs,rsrc,codeevnt,podcast,yt) to boolean
+  # Remove outliers for age
+  # Remove irrelevant values for others
+  # Remove number of children
 
   # Remove survey-year specific outliers
   allXs <- part2 %>% filter(ExpectedEarning == "xxxxx")
