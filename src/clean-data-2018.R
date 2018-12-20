@@ -835,16 +835,180 @@ clean_part <- function(part) {
   cleanPart
 }
 
-
 # Title:
-#   Remove obvious outliers
-# Description:
-#   This function removes obvious outliers, which most likely are fake because
-#   they don't even try to answer the question
+#   Rename Survey Variables
 # Usage:
-# part1 <- rm_obv_outliers(part1)
-rm_obv_outliers <- function(part) {
-  part
+#   > renamed_data <- rename_data_vars(dat)
+rename_data_vars <- function(dat) {
+  renamed_data <- dat %>%
+    rename(
+      is_software_dev = "Are you already working as a software developer?",
+      is_first_dev_job = "Is this your first software development job?",
+      months_job_search = "Before you got this job, how many months did you spend looking for a job?",
+      job_pref = "Would you prefer to...",
+
+      # Job interests
+      job_intr_fllstck = "Full-Stack Web Developer",
+      job_intr_backend = "Back-End Web Developer",
+      job_intr_frntend = "Front-End Web Developer",
+      job_intr_mobile = "Mobile Developer",
+      job_intr_devops = "DevOps / SysAdmin",
+      job_intr_datasci = "Data Scientist",
+      job_intr_teacher = "Teacher / Trainer / Developer Evangelist",
+      job_intr_qa_engn = "Quality Assurance Engineer",
+      job_intr_ux_engn = "User Experience Designer",
+      job_intr_projm = "Product Manager",
+      job_intr_gamedev = "Game Developer",
+      job_intr_infosec = "Information Security",
+      job_intr_dataengn = "Data Engineer",
+      job_intr_other = "Other",
+
+      when_appl_job = "When do you plan to start applying for developer jobs?",
+      expected_earn = "About how much money do you expect to earn per year at your first developer job (in US Dollars)?",
+      job_lctn_pref = "Would you prefer to work...",
+      job_relocate = "Are you willing to relocate for a job?",
+
+      # Reasons to code
+      reasons_to_code = "What is your biggest reason for learning to code?",
+      reasons_to_code_othr = "Other_1", # Very inspiring column to read
+
+      # Learning resources
+      rsrc_fcc = "freeCodeCamp",
+      rsrc_mdn = "Mozilla Developer Network (MDN)",
+      rsrc_so = "Stack Overflow",
+      rsrc_edx = "EdX",
+      rsrc_coursera = "Coursera",
+      rsrc_khan_acdm = "Khan Academy",
+      rsrc_pluralsght = "Pluralsight",
+      rsrc_codeacdm = "Codecademy",
+      rsrc_udacity = "Udacity",
+      rsrc_udemy = "Udemy",
+      rsrc_code_wars = "Code Wars",
+      rsrc_treehouse = "Treehouse",
+      rsrc_hackerrank = "HackerRank",
+      rsrc_frntendmstr = "Front End Masters",
+      rsrc_lynda = "Lynda.com",
+      rsrc_egghead = "Egghead.io",
+      rsrc_css_tricks = "CSS Tricks",
+      rsrc_other = "Other_2",
+
+      # Coding events attended
+      codeevnt_fcc = "freeCodeCamp study groups",
+      codeenvt_hackthn = "hackathons",
+      codeenvt_confs = "conferences",
+      codeenvt_workshps = "workshops",
+      codeenvt_startupwknd = "Startup Weekend",
+      codeenvt_nodeschl = "NodeSchool",
+      codeenvt_womenwc = "Women Who Code",
+      codeenvt_girldevit = "Girl Develop It",
+      codeenvt_coderdojo = "CoderDojo",
+      codeenvt_meetup = "Meetup.com events",
+      codeenvt_railsbrdg = "RailsBridge",
+      codeenvt_gamejam = "Game Jam",
+      codeenvt_railsgrls = "Rails Girls",
+      codeenvt_djangogrls = "Django Girls",
+      codeenvt_wkndbtcmp = "weekend bootcamps",
+      codeenvt_other = "Other_3",
+
+      # Podcasts listened to
+      podcast_fcc = "The freeCodeCamp Podcast",
+      podcast_codenewbie = "Code Newbie",
+      podcast_changelog = "The Changelog",
+      podcast_sedaily = "Software Engineering Daily",
+      podcast_js_jabber = "JavaScript Jabber",
+      podcast_syntaxfm = "Syntax.fm",
+      podcast_ltcwm = "Learn To Code With Me",
+      podcast_fullstckrd = "Full Stack Radio",
+      podcast_frnthppyhr = "Front End Happy Hour",
+      podcast_codingblcks = "Coding Blocks",
+      podcast_shoptalk = "Shop Talk Show",
+      podcast_devtea = "Developer Tea",
+      podcast_progthrwdwn = "Programming Throwdown",
+      podcast_geekspeak = "Geek Speak",
+      podcast_hanselmnts = "Hanselminutes",
+      podcast_talkpythonme = "Talk Python To Me",
+      podcast_rubyrogues = "Ruby Rogues",
+      podcast_codepenrd = "CodePen Radio",
+      podcast_seradio = "Software Engineering Radio",
+      podcast_other = "Other_4",
+
+      # YouTube channels
+      yt_mit_ocw = "MIT Open Courseware",
+      yt_fcc = "freeCodeCamp's YouTube channel",
+      yt_computerphile = "Computerphile",
+      yt_devtips = "DevTips",
+      yt_cs_dojo = "CS Dojo",
+      yt_engn_truth = "Engineered Truth",
+      yt_learncodeacdm = "LearnCode.Academy",
+      yt_lvluptuts = "LevelUpTuts",
+      yt_funfunfunct = "Fun Fun Function",
+      yt_codingtuts360 = "Coding Tutorials 360",
+      yt_codingtrain = "Coding Train",
+      yt_derekbanas = "Derek Banas",
+      yt_simplilearn = "Simplilearn",
+      yt_simpleprog = "Simple Programmer (Bulldog Mindset)",
+      yt_mozillahacks = "Mozilla Hacks",
+      yt_googledevs = "Google Developers",
+      yt_other = "Other_5",
+
+      # Learning information
+      hours_learning = "About how many hours do you spend learning each week?",
+      months_programming = "About how many months have you been programming for?",
+
+      # Bootcamps
+      bootcamp_attend = "Have you attended a full-time coding bootcamp?",
+      bootcamp_name = "Which one?",
+      bootcamp_finished = "Have you finished yet?",
+      bootcamp_have_loan = "Did you take out a loan to pay for the bootcamp?",
+      bootcamp_recommend = "Based on your experience, would you recommend this bootcamp to your friends?",
+
+      money_for_learning = "Aside from university tuition, about how much money have you spent on learning to code so far (in US dollars)?",
+      age = "How old are you?",
+
+      # Individual's gender
+      gender = "What's your gender?",
+      gender_other = "Other_6",
+
+      # Demographics
+      country_citizen = "Which country are you a citizen of?",
+      country_live = "Which country do you currently live in?",
+      live_city_population = "About how many people live in your city?",
+      is_ethnic_minority = "Are you an ethnic minority in your country?",
+      lang_at_home = "Which language do you you speak at home with your family?",
+
+      # Education
+      school_degree = "What's the highest degree or level of school you have completed?",
+      school_major = "What was the main subject you studied in university?",
+
+      # Personal and family information
+      marital_status = "What's your marital status?",
+      has_finance_depends = "Do you financially support any dependents?",
+      has_children = "Do you have children?",
+      num_children = "How many children do you have?",
+      do_finance_support = "Do you financially support any elderly relatives or relatives with disabilities?",
+      debt_amt = "Do you have any debt?",
+      home_mrtg_has = "Do you have a home mortgage?",
+      home_mrtg_owe = "About how much do you owe on your home mortgage (in US Dollars)?",
+      student_debt_has = "Do you have student loan debt?",
+      student_debt_amt = "About how much do you owe in student loans (in US Dollars)?",
+
+      # Employment status information
+      curr_emplymnt = "Regarding employment status, are you currently...",
+      curr_emplymnt_other = "Other_7",
+      curr_field = "Which field do you work in?",
+      last_yr_income = "About how much money did you make last year (in US dollars)?",
+      communite_time = "About how many minutes does it take you to get to work each day?",
+      is_self_employed = "Do you consider yourself under-employed?",
+      has_served_military = "Have you served in your country's military before?",
+      is_recv_disab_bnft = "Do you receive disability benefits from your government?",
+      has_high_spd_ntnet = "Do you have high speed internet at your home?",
+
+      # Miscellaneous
+      time_start = "Start Date (UTC)",
+      time_end = "Submit Date (UTC)",
+      network_id = "Network ID"
+    )
+  renamed_data
 }
 
 
@@ -1107,6 +1271,8 @@ polish_data <- function(cleanData) {
   cleanData
 }
 
+
+
 # Main Function -------------------------------------------
 
 # Title:
@@ -1122,260 +1288,25 @@ main <- function(dataPath1, dataPath2) {
   dat <- data_path %>%
     read_csv() %>%
     rename(ID = "#")
-  
-  # Change column names to something easier to use
-  part1 <- rename_part_1(dat$part1)
 
-  renamed_data <- dat %>%
-    rename(
-      is_software_dev = "Are you already working as a software developer?",
-      is_first_dev_job = "Is this your first software development job?",
-      months_job_search = "Before you got this job, how many months did you spend looking for a job?",
-      job_pref = "Would you prefer to...",
-      
-      # Job interests
-      job_intr_fllstck = "Full-Stack Web Developer",
-      job_intr_backend = "Back-End Web Developer",
-      job_intr_frntend = "Front-End Web Developer",
-      job_intr_mobile = "Mobile Developer",
-      job_intr_devops = "DevOps / SysAdmin",
-      job_intr_datasci = "Data Scientist",
-      job_intr_qa_engn = "Quality Assurance Engineer",
-      job_intr_ux_engn = "User Experience Designer",
-      job_intr_projm = "Product Manager",
-      job_intr_gamedev = "Game Developer",
-      job_intr_infosec = "Information Security",
-      job_intr_dataengn = "Data Engineer",
-      job_intr_other = "Other",
+  # Rename variables with easier names
+  renamed_data = rename_data_vars(dat)
 
-      when_appl_job = "When do you plan to start applying for developer jobs?",
-      expected_earn = "About how much money do you expect to earn per year at your first developer job (in US Dollars)?",
-      job_lctn_pref = "Would you prefer to work...",
-      job_relocate = "Are you willing to relocate for a job?",
+  # Change variables to boolean
 
-      # Reasons to code
-      reasons_to_code = "What is your biggest reason for learning to code?",
-      reasons_to_code_othr = "Other_1", # Very inspiring column to read
-
-      # Learning resources
-      rsrc_fcc = "freeCodeCamp",
-      rsrc_mdn = "Mozilla Developer Network (MDN)",
-      rsrc_so = "Stack Overflow",
-      rsrc_edx = "EdX",
-      rsrc_coursera = "Coursera",
-      rsrc_khan_acdm = "Khan Academy",
-      rsrc_pluralsght = "Pluralsight",
-      rsrc_codeacdm = "Codecademy",
-      rsrc_udacity = "Udacity",
-      rsrc_udemy = "Udemy",
-      rsrc_code_wars = "Code Wars",
-      rsrc_treehouse = "Treehouse",
-      rsrc_hackerrank = "HackerRank",
-      rsrc_frntendmstr = "Front End Masters",
-      rsrc_lynda = "Lynda.com",
-      rsrc_egghead = "Egghead.io",
-      rsrc_css_tricks = "CSS Tricks",
-      rsrc_other = "Other_2",
-
-      # Coding events attended
-      codeevnt_fcc = "freeCodeCamp study groups",
-      codeenvt_hackthn = "hackathons",
-      codeenvt_confs = "conferences",
-      codeenvt_workshps = "workshops",
-      codeenvt_startupwknd = "Startup Weekend",
-      codeenvt_nodeschl = "NodeSchool",
-      codeenvt_womenwc = "Women Who Code",
-      codeenvt_girldevit = "Girl Develop It",
-      codeenvt_coderdojo = "CoderDojo",
-      codeenvt_meetup = "Meetup.com events",
-      codeenvt_railsbrdg = "RailsBridge",
-      codeenvt_gamejam = "Game Jam",
-      codeenvt_railsgrls = "Rails Girls",
-      codeenvt_djangogrls = "Django Girls",
-      codeenvt_wkndbtcmp = "weekend bootcamps",
-      codeenvt_other = "Other_3",
-      
-      # Podcasts listened to
-      "The freeCodeCamp Podcast",
-      "Code Newbie",
-      "The Changelog",
-      "Software Engineering Daily",
-      "JavaScript Jabber",
-      "Syntax.fm",
-      "Learn To Code With Me",
-      "Full Stack Radio",
-      "Front End Happy Hour",
-      "Coding Blocks",
-      "Shop Talk Show",
-      "Developer Tea",
-      "Programming Throwdown",
-      "Geek Speak",
-      "Hanselminutes",
-      "Talk Python To Me",
-      "Ruby Rogues",
-      "CodePen Radio",
-      "Software Engineering Radio",
-      "Other_4",
-      PodcastCodeNewbie = Code.Newbie
-      PodcastChangeLog = The.Changelog
-      PodcastSEDaily = Software.Engineering.Daily
-      PodcastJSJabber = JavaScript.Jabber
-      PodcastRubyRogues = Ruby.Rogues
-      PodcastShopTalk = Shop.Talk.Show
-      PodcastDevTea = Developer.Tea
-      PodcastProgThrowdown = Programming.Throwdown
-      PodcastDotNET = .NET.Rocks
-      PodcastTalkPython = Talk.Python.To.Me
-      PodcastJSAir = JavaScript.Air
-      PodcastTheWebAhead = The.Web.Ahead
-      PodcastCodePen = CodePen.Radio
-      PodcastGiantRobots = Giant.Robots.Smashing.into.Other.Giant.Robots
-      PodcastSERadio = Software.Engineering.Radio
-      PodcastOther = Other.3
-      
-      # YouTube channels
-      "MIT Open Courseware",
-      "freeCodeCamp's YouTube channel",
-      "Computerphile",
-      "DevTips",
-      "CS Dojo",
-      "Engineered Truth",
-      "LearnCode.Academy",
-      "LevelUpTuts",
-      "Fun Fun Function",
-      "Coding Tutorials 360",
-      "Coding Train",
-      "Derek Banas",
-      "Simplilearn",
-      "Simple Programmer (Bulldog Mindset)",
-      "Mozilla Hacks",
-      "Google Developers",
-      "Other_5",
-      YouTubeMIT = MIT.Open.Courseware
-      YouTubeTheNewBoston = The.New.Boston
-      YouTubeFCC = freeCodeCamp.1
-      YouTubeComputerphile = Computerphile
-      YouTubeDevTips = DevTips
-      YouTubeEngineeredTruth = Engineered.Truth
-      YouTubeLearnCode = LearnCode.Academy
-      YouTubeCodeCourse = CodeCourse
-      YouTubeLevelUpTuts = LevelUpTuts
-      YouTubeFunFunFunction = funfunfunction
-      YouTubeCodingTut360 = Coding.Tutorials.360
-      YouTubeCodingTrain = Coding.Train..Coding.Rainbow.
-      YouTubeDerekBanas = Derek.Banas
-      YouTubeSimplilearn = Simplilearn
-      YouTubeMozillaHacks = Mozilla.Hacks
-      YouTubeGoogleDev = Google.Developers
-      YouTubeOther = Other.4
-      
-      "About how many hours do you spend learning each week?",
-      "About how many months have you been programming for?",
-      "Have you attended a full-time coding bootcamp?",
-      "Which one?",
-      "Have you finished yet?",
-      "Did you take out a loan to pay for the bootcamp?",
-      "Based on your experience, would you recommend this bootcamp to your friends?",
-      "Aside from university tuition, about how much money have you spent on learning to code so far (in US dollars)?",
-      "How old are you?",
-      
-      # Individual's gender
-      "What's your gender?",
-      "Other_6",
-
-      # Demographics
-      "Which country are you a citizen of?",
-      "Which country do you currently live in?",
-      "About how many people live in your city?",
-      "Are you an ethnic minority in your country?",
-      "Which language do you you speak at home with your family?",
-
-      "What's the highest degree or level of school you have completed?",
-      "What was the main subject you studied in university?",
-      "What's your marital status?",
-      "Do you financially support any dependents?",
-      "Do you have children?",
-      "How many children do you have?",
-      "Do you financially support any elderly relatives or relatives with disabilities?",
-      "Do you have any debt?",
-      "Do you have a home mortgage?",
-      "About how much do you owe on your home mortgage (in US Dollars)?",
-      "Do you have student loan debt?",
-      "About how much do you owe in student loans (in US Dollars)?",
-
-      "Regarding employment status, are you currently...",
-      "Other_7",
-
-      "Which field do you work in?",
-      "About how much money did you make last year (in US dollars)?",
-      "About how many minutes does it take you to get to work each day?",
-      "Do you consider yourself under-employed?",
-      "Have you served in your country's military before?",
-      "Do you receive disability benefits from your government?",
-      IsReceiveDisabilitiesBenefits = Do.you.receive.disability.benefits.from.your.government.
-      "Do you have high speed internet at your home?",
-      HasHighSpdInternet = Do.you.have.high.speed.internet.at.your.home.
-
-      # Miscellaneous
-      "Start Date (UTC)",
-      "Submit Date (UTC)",
-      "Network ID"
-    )
-      
-      HoursLearning = About.how.many.hours.do.you.spend.learning.each.week.
-      MonthsProgramming = About.how.many.months.have.you.been.programming.for.
-      BootcampYesNo = Have.you.attended.a.full.time.coding.bootcamp.
-      BootcampName = Which.one.
-      BootcampFinish = Have.you.finished.yet.
-      BootcampLoan = Did.you.take.out.a.loan.to.pay.for.the.bootcamp.
-      BootcampRecommend = Based.on.your.experience..would.you.recommend.this.bootcamp.to.your.friends.
-      MoneyForLearning = Aside.from.university.tuition..about.how.much.money.have.you.spent.on.learning.to.code.so.far..in.US.dollars..
-      Part1StartTime = Start.Date..UTC.
-      Part1EndTime = Submit.Date..UTC.
-      NetworkID = Network.ID
-      Age = How.old.are.you.
-      Gender = What.s.your.gender.
-      GenderOther = Other
-      CountryCitizen = Which.country.are.you.a.citizen.of.
-      CountryLive = Which.country.do.you.currently.live.in.
-      CityPopulation = About.how.many.people.live.in.your.city.
-      IsEthnicMinority = Are.you.an.ethnic.minority.in.your.country.
-      LanguageAtHome = Which.language.do.you.you.speak.at.home.with.your.family.
-      SchoolDegree = What.s.the.highest.degree.or.level.of.school.you.have.completed.
-      SchoolMajor = What.was.the.main.subject.you.studied.in.university.
-      MaritalStatus = What.s.your.marital.status.
-      HasFinancialDependents = Do.you.financially.support.any.dependents.
-      HasChildren = Do.you.have.children.
-      ChildrenNumber = How.many.children.do.you.have.
-      FinanciallySupporting = Do.you.financially.support.any.elderly.relatives.or.relatives.with.disabilities.
-      DebtAmount = Do.you.have.any.debt.
-      HasHomeMortgage = Do.you.have.a.home.mortgage.
-      HomeMortgageOwe = About.how.much.do.you.owe.on.your.home.mortgage..in.US.Dollars..
-      HasStudentDebt = Do.you.have.student.loan.debt.
-      StudentDebtOwe = About.how.much.do.you.owe.in.student.loans..in.US.Dollars..
-      EmploymentStatus = Regarding.employment.status..are.you.currently...
-      EmploymentStatusOther = Other.1
-      EmploymentField = Which.field.do.you.work.in.
-      EmploymentFieldOther = Other.2
-      Income = About.how.much.money.did.you.make.last.year..in.US.dollars..
-      CommuteTime = About.how.many.minutes.does.it.take.you.to.get.to.work.each.day.
-      IsUnderEmployed = Do.you.consider.yourself.under.employed.
-      HasServedInMilitary = Have.you.served.in.your.country.s.military.before.
-  
   # Remove survey-year specific outliers
   allXs <- part2 %>% filter(ExpectedEarning == "xxxxx")
   part2 <- part2 %>% setdiff(allXs)
-  
+
   # Make variables between datasets consistent for joining
   consistentData <- std_data_type(part1, part2)
 
-  
   # Clean both parts of the data
   cleanData <- clean_part(allData)
-  
+
   # Polish data with small changes e.g. give correct data types to columns
   final <- polish_data(cleanData)
-  
+
   # Combine data and create cleaned data
   out_path <- here("clean-data", "2018-fCC-New-Coders-Survey-Data.csv")
   write_csv(x = final, path = out_path)
