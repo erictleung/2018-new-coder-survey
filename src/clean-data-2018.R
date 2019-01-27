@@ -1209,8 +1209,10 @@ main <- function(dataPath1, dataPath2) {
               vchar_to_one)
 
   # Remove outliers for age
+  # Oldest living is 116, so filtering on that age
+  # https://en.wikipedia.org/wiki/List_of_the_oldest_living_people
   age_outlier_removed <- bool_changed_data %>%
-    filter(age == 100)
+    filter(age < 116)
 
   # Remove impossible hours learning
   # Remove irrelevant values for others
