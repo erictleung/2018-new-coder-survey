@@ -308,7 +308,12 @@ raw_data %>%
 ### Check number of children
 
 ```{r}
-
+raw_data %>%
+  rename(num_children = `How many children do you have?`) %>%
+  select(num_children) %>%
+  group_by(num_children) %>%
+  add_count() %>%
+  distinct()
 ```
 
 

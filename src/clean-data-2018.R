@@ -1163,6 +1163,10 @@ main <- function(dataPath1, dataPath2) {
     filter(money_for_learning < 250000 |
              is.na(money_for_learning))
 
+  # Remove high number of children
+  rm_high_num_kids <- remove_excess_money_spent %>%
+    filter(num_children < 20)
+
   # Remove irrelevant values for others
   # - job interest
   # - resource
