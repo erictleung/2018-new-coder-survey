@@ -1214,6 +1214,19 @@ main <- function(dataPath1, dataPath2) {
   age_outlier_removed <- bool_changed_data %>%
     filter(age < 116)
 
+  # Remove questionable months learning by cross-checking age
+  # Here, convert age to months and take the difference between age
+  # and months programming. Here, remove entries that claim you've
+  # programmed more than you've been alive.
+  # Counts:
+  # - 5 years =  60
+  # - 10 years = 120
+  # - 50 years = 600
+  age_checked_learning <- age_outlier_removed %>%
+    mutate(months_age = age * 12) %>%
+    mutate(prog_age_diff = months_age - months_programming) %>%
+    filter(prog_age_diff > 0)
+
   # Remove impossible hours learning
   # Remove irrelevant values for others
   # - job interest

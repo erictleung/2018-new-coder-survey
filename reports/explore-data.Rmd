@@ -254,7 +254,17 @@ some of them being outliers.
 ### Check number of months programming
 
 ```{r}
-
+raw_data %>%
+  rename(months_programming = `About how many months have you been programming for?`) %>%
+  rename(age = `How old are you?`) %>%
+  select(age, months_programming) %>%
+  mutate(age_months = age * 12) %>%
+  select(-age) %>%
+  mutate(prog_age_diff = age_months - months_programming) %>%
+  group_by(months_programming) %>%
+  add_count() %>%
+  distinct() %>%
+  arrange(desc(months_programming))
 ```
 
 ### Check month spent on programming outside of university
@@ -269,8 +279,7 @@ some of them being outliers.
 ```{r}
 raw_data %>%
   select(`How old are you?`) %>%
-  mutate(age = `How old are you?`) %>%
-  select(age) %>%
+  rename(age = `How old are you?`) %>%
   group_by(age) %>%
   add_count() %>%
   distinct() %>%
