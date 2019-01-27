@@ -87,25 +87,28 @@ yesNo_to_oneZero <- function(part2, changeCols) {
 # Title:
 #   Change Characters to One
 # Description:
-#   Lots of columns need to be changed
+#   Lots of columns need to be changed from characters to just 1, indicated that
+#   the respondent checked this option. Check if input is NA and changes it to a
+#   character 1.
+#
+#   Note: vchar_to_one is meant to be used on vectors.
 # Input:
-#   Designed for the second dataset
+#   Vector of characters, can have NA
 # Output:
-#   The second dataset with all yes/no answers changed to 1/0
+#   Vector of characters, with just "1"'s and NAs
 # Usage:
-#   > part2 <- yesNo_to_oneZero(part2)
-char_to_one <- function(part, changeCols) {
-  fixedPart <- part
-  for (col in changeCols) {
-    varvalOne <- lazyeval::interp(~ ifelse(!is.na(colName),
-                                           yes = "1",
-                                           no = colName),
-                                  colName = as.name(col))
-    fixedPart <- fixedPart %>%
-      mutate_(.dots = setNames(list(varvalOne), col))
+#   > test_vec <- c(sample(letters, 10), rep(NA, 3))
+#   > vchar_to_one(tes)
+#   #   x    f    r    w    i    v    q    a    l    h <NA> <NA> <NA>
+#   # "1"  "1"  "1"  "1"  "1"  "1"  "1"  "1"  "1"  "1"   NA   NA   NA
+char_to_one <- function(x) {
+  if (!is.na(x)) {
+    "1"
+  } else {
+    x
   }
-  fixedPart
 }
+vchar_to_one <- Vectorize(char_to_one)
 
 
 # Title:
@@ -300,32 +303,6 @@ helper_filter <- function(part, col, words, printYes = NA) {
 
 
 # Sub-Cleaning Functions ----------------------------------
-# Description:
-#   These functions perform cleaning on specific variables in the data
-
-# Title:
-#   Clean Job Role Interests
-# Description:
-#   This year's survey allowed multiple choices for the job roles. So each
-#   multiple choice got their own column and needs to be converted to more
-#   boolean values.
-# Usage:
-#   > cleanJob <- clean_job_interest(part)
-clean_job_interest <- function(part) {
-  cat("Cleaning responses for job interests...\n")
-  
-  # Job interest columns that need to be changed
-  colsChange <- c("JobInterestFullStack", "JobInterestBackEnd",
-                  "JobInterestFrontEnd", "JobInterestMobile",
-                  "JobInterestDevOps", "JobInterestDataSci",
-                  "JobInterestQAEngr", "JobInterestUX",
-                  "JobInterestProjMngr", "JobInterestGameDev",
-                  "JobInterestDataEngr", "JobInterestInfoSec")
-  
-  cat("Finished cleaning responses for job interests.\n")
-  part %>% char_to_one(changeCols = colsChange)
-}
-
 
 # Title:
 #   Clean Other Job Role Interest
@@ -436,14 +413,6 @@ clean_expected_earnings <- function(cleanPart1) {
 clean_code_events <- function(cleanPart1) {
   cat("Cleaning responses for coding events...\n")
   
-  # Convert coding events to binary/boolean
-  codeResources <- cleanPart1 %>%
-    select(starts_with("CodeEvent"), -CodeEventOther, -CodeEvent) %>%
-    mutate_each(funs(ifelse(!is.na(.), "1", NA)))
-  cleanPart1 <- cleanPart1 %>%
-    select(-starts_with("CodeEvent"), CodeEventOther, CodeEvent) %>%
-    bind_cols(codeResources)
-  
   # Title case other coding events
   codingEvents <- cleanPart1 %>% filter(!is.na(CodeEventOther)) %>%
     mutate(CodeEventOther = simple_title_case(CodeEventOther))
@@ -491,14 +460,6 @@ clean_code_events <- function(cleanPart1) {
 #       - "Giant Robots Smashing into other Giant Robots"
 clean_podcasts <- function(cleanPart) {
   cat("Cleaning responses for other podcasts...\n")
-  
-  # Convert Podcasts to binary/boolean
-  podcasts <- cleanPart %>%
-    select(starts_with("Podcast"), -PodcastOther, -Podcast) %>%
-    mutate_each(funs(ifelse(!is.na(.), "1", NA)))
-  cleanPart <- cleanPart %>%
-    select(-starts_with("Podcast"), PodcastOther, Podcast) %>%
-    bind_cols(podcasts)
   
   # Normalize variations of "None" in PodcastOther
   nonePod <- c("non", "none", "haven't", "havent", "not a",
@@ -679,44 +640,6 @@ clean_income <- function(cleanPart) {
 
 
 # Title:
-#   Clean Other Resources
-# Description:
-#   Searches for mentions of other resources and creates new columns for
-#   mentions greater than 1% of responses for other resources. Columns
-#   targeted:
-#   - "Treehouse"                      - "Lynda.com"
-#   - "Stack Overflow"                 - "Books"
-#   - "W3Schools"                      - "Skillcrush"
-#   - "YouTube"                        - "Google"
-#   - "HackerRank"                     - "Reddit"
-#   - "Mozilla MDN"                    - "SoloLearn"
-#   - "Blogs"                          - "EggHead"
-# Note: honorable mentions to:
-#   - "Laracasts"
-#   - "StackExchange"
-#   - "Project Euler"
-#   - "CSS Tricks"
-#   - "The New Boston"
-#   - "Frontend Masters"
-# Usage:
-#   > cleanPart <- clean_resources(cleanPart)
-clean_resources <- function(cleanPart) {
-  cat("Cleaning responses for other resources...\n")
-  
-  # Convert Resources to binary/boolean
-  resources <- cleanPart %>%
-    select(starts_with("Resource"), -ResourceOther, -Resources) %>%
-    mutate_each(funs(ifelse(!is.na(.), "1", NA)))
-  cleanPart <- cleanPart %>%
-    select(-starts_with("Resource"), ResourceOther, Resources) %>%
-    bind_cols(resources)
-  
-  cat("Finished cleaning responses for other resources.\n")
-  cleanPart
-}
-
-
-# Title:
 #   Clean Student Debt Amount
 # Description:
 #   Remove commas, set minimum to $1000, set maximum to $500000, and make
@@ -776,31 +699,6 @@ clean_children <- function(cleanPart) {
 }
 
 
-# Title:
-#   Clean YouTube
-# Description:
-#   This year's survey allowed multiple choices for the YouTube channels you
-#   watch. So each multiple choice got their own column and needs to be
-#   converted to more boolean values.
-# Usage:
-#   > cleanJob <- clean_youtube(part)
-clean_youtube <- function(part) {
-  cat("Cleaning responses for YouTube channels watched...\n")
-  
-  # Job interest columns that need to be changed
-  colsChange <- c("YouTubeCodeCourse", "YouTubeCodingTrain",
-                  "YouTubeCodingTut360", "YouTubeComputerphile",
-                  "YouTubeDerekBanas", "YouTubeDevTips",
-                  "YouTubeEngineeredTruth", "YouTubeFCC",
-                  "YouTubeFunFunFunction", "YouTubeGoogleDev",
-                  "YouTubeLearnCode", "YouTubeLevelUpTuts",
-                  "YouTubeMIT", "YouTubeMozillaHacks",
-                  "YouTubeSimplilearn", "YouTubeTheNewBoston")
-  
-  cat("Finished cleaning responses for YouTube channels watched.\n")
-  part %>% char_to_one(changeCols = colsChange)
-}
-
 # Main Process Functions ----------------------------------
 # Description:
 #   These functions encompass the bulk work of the cleaning and transformation
@@ -813,7 +711,6 @@ clean_part <- function(part) {
   cat("Beginning cleaning of data...\n")
   
   # Clean each column that needs it
-  cleanPart <- clean_job_interest(part) # Clean Job Roles to Binary
   cleanPart <- clean_job_interest_other(cleanPart)  # Clean Job Role Interests
   cleanPart <- clean_expected_earnings(cleanPart)  # Clean expected earnings
   cleanPart <- clean_code_events(cleanPart)   # Clean other coding events
@@ -822,10 +719,8 @@ clean_part <- function(part) {
   cleanPart <- clean_age(cleanPart)  # Clean age
   cleanPart <- clean_mortgage_amt(cleanPart)  # Clean mortgage amount
   cleanPart <- clean_income(cleanPart)  # Clean income
-  cleanPart <- clean_resources(cleanPart)  # Clean other resources
   cleanPart <- clean_student_debt(cleanPart)  # Clean student debt amount
   cleanPart <- clean_children(cleanPart)  # Clean children responses
-  cleanPart <- clean_youtube(cleanPart)  # Clean YouTube channels
   
   # Remove unnecessary columns
   cleanPart <- cleanPart %>%
@@ -870,7 +765,7 @@ rename_data_vars <- function(dat) {
 
       # Reasons to code
       reasons_to_code = "What is your biggest reason for learning to code?",
-      reasons_to_code_othr = "Other_1", # Very inspiring column to read
+      reasons_to_code_other = "Other_1", # Very inspiring column to read
 
       # Learning resources
       rsrc_fcc = "freeCodeCamp",
@@ -1272,7 +1167,6 @@ polish_data <- function(cleanData) {
 }
 
 
-
 # Main Function -------------------------------------------
 
 # Title:
@@ -1293,9 +1187,41 @@ main <- function(dataPath1, dataPath2) {
   renamed_data = rename_data_vars(dat)
 
   # Change variables (jobs,rsrc,codeevnt,podcast,yt) to boolean
+  bool_changed_data <- renamed_data %>%
+    # Change job interest
+    mutate_at(vars(starts_with("job_intr_"), -job_intr_other),
+              vchar_to_one) %>%
+
+    # Change resources
+    mutate_at(vars(starts_with("rsrc_"), -rsrc_other),
+              vchar_to_one) %>%
+
+    # Change coding events
+    mutate_at(vars(starts_with("codeenvt_"), -codeenvt_other),
+              vchar_to_one) %>%
+
+    # Change podcasts
+    mutate_at(vars(starts_with("podcast_"), -podcast_other),
+              vchar_to_one) %>%
+
+    # Change YouTube channels
+    mutate_at(vars(starts_with("yt_"), -yt_other),
+              vchar_to_one)
+
   # Remove outliers for age
+  age_outlier_removed <- bool_changed_data %>%
+    filter(age == 100)
+
+  # Remove impossible hours learning
   # Remove irrelevant values for others
-  # Remove number of children
+  # - job interest
+  # - resource
+  # - coding events
+  # - podcast
+  # - YouTube
+  # - gender
+  # - employment status
+  # Remove high number of children
 
   # Remove survey-year specific outliers
   allXs <- part2 %>% filter(ExpectedEarning == "xxxxx")
