@@ -270,7 +270,14 @@ raw_data %>%
 ### Check month spent on programming outside of university
 
 ```{r}
-
+raw_data %>%
+  rename(money_for_learning = `Aside from university tuition, about how much money have you spent on learning to code so far (in US dollars)?`) %>%
+  select(money_for_learning) %>%
+  group_by(money_for_learning) %>%
+  add_count() %>%
+  distinct() %>%
+  filter(money_for_learning > 250000) %>%
+  arrange(desc(money_for_learning))
 ```
 
 

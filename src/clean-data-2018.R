@@ -483,76 +483,6 @@ clean_podcasts <- function(cleanPart) {
 
 
 # Title:
-#   Clean Hours Learned Per Week
-# Usage:
-#   > cleanPart <- clean_hours_learn(cleanPart)
-clean_hours_learn <- function(cleanPart) {
-  cat("Cleaning responses for hours of learning per week...\n")
-  
-  # Remove the word "hour(s)"
-  hoursIdx <- cleanPart %>% select(HoursLearning) %>%
-    mutate_each(funs(grepl("hours", ., ignore.case = TRUE))) %>%
-    unlist(use.names = FALSE)
-  hoursData <- cleanPart %>% filter(hoursIdx) %>%
-    mutate(HoursLearning = sub("hours.*", "", HoursLearning))
-  cleanPart <- cleanPart %>% filter(!hoursIdx) %>% bind_rows(hoursData)
-  
-  # Remove hyphen and "to" for ranges of hours
-  rangeHrIdx <- cleanPart %>% select(HoursLearning) %>%
-    mutate_each(funs(grepl("-|to", ., ignore.case = TRUE))) %>%
-    unlist(use.names = FALSE)
-  rangeHrData <- cleanPart %>% filter(rangeHrIdx) %>%
-    mutate(HoursLearning = average_string_range(HoursLearning))
-  cleanPart <- cleanPart %>% filter(!rangeHrIdx) %>%
-    bind_rows(rangeHrData)
-  
-  # Remove hours greater than 100 hours
-  cleanPart <- cleanPart %>%
-    mutate(HoursLearning = as.integer(HoursLearning)) %>%
-    mutate(HoursLearning = ifelse(HoursLearning > 100, NA, HoursLearning))
-  
-  cat("Finished cleaning responses for hours of learning per week.\n")
-  cleanPart
-}
-
-
-# Title:
-#   Clean Money Spent on Learning
-# Usage:
-#   > cleanPart <- clean_money_learning(cleanPart)
-clean_money_learning <- function(cleanPart) {
-  cat("Cleaning responses for money used for learning...\n")
-  
-  # Floor values to nearest dollar using as.integer
-  cleanPart <- cleanPart %>%
-    mutate(MoneyForLearning = as.integer(MoneyForLearning))
-  
-  # Remove outliers of greater than $250,000
-  cleanPart <- cleanPart %>%
-    mutate(MoneyForLearning = remove_outlier(MoneyForLearning, 250000))
-  
-  cat("Finished cleaning responses for money used for learning.\n")
-  cleanPart
-}
-
-
-# Title:
-#   Clean Age
-# Usage:
-#   > cleanPart <- clean_age(cleanPart)
-clean_age <- function(cleanPart) {
-  cat("Cleaning responses for age...\n")
-  
-  # Make ages >100 equal to NA
-  cleanPart <- cleanPart %>%
-    mutate(Age = remove_outlier(Age, 100))
-  
-  cat("Finished cleaning responses for age.\n")
-  cleanPart
-}
-
-
-# Title:
 #   Clean Mortgage Amount
 # Usage:
 #   > cleanPart <- clean_mortgage_amt(cleanPart)
@@ -716,7 +646,6 @@ clean_part <- function(part) {
   cleanPart <- clean_code_events(cleanPart)   # Clean other coding events
   cleanPart <- clean_podcasts(cleanPart)   # Clean Podcasts Other
   cleanPart <- clean_money_learning(cleanPart)  # Clean money for learning
-  cleanPart <- clean_age(cleanPart)  # Clean age
   cleanPart <- clean_mortgage_amt(cleanPart)  # Clean mortgage amount
   cleanPart <- clean_income(cleanPart)  # Clean income
   cleanPart <- clean_student_debt(cleanPart)  # Clean student debt amount
@@ -1227,7 +1156,12 @@ main <- function(dataPath1, dataPath2) {
     mutate(prog_age_diff = months_age - months_programming) %>%
     filter(prog_age_diff > 0)
 
-  # Remove impossible hours learning
+  # Remove excess money for learning
+  # Keep NA values as well
+  remove_excess_money_spent <- age_checked_learning %>%
+    filter(money_for_learning < 250000 |
+             is.na(money_for_learning))
+
   # Remove irrelevant values for others
   # - job interest
   # - resource
