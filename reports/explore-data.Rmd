@@ -274,13 +274,18 @@ raw_data %>%
   group_by(age) %>%
   add_count() %>%
   distinct() %>%
-  arrange(desc(n))
+  arrange(n)
 ```
 
 ### Check other genders
 
 ```{r}
-
+raw_data %>%
+  select(`What's your gender?`, Other_6) %>%
+  rename(gender = Other_6) %>%
+  group_by(gender) %>%
+  add_count(gender) %>%
+  distinct()
 ```
 
 
