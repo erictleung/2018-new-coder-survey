@@ -1154,7 +1154,8 @@ main <- function(dataPath1, dataPath2) {
   age_checked_learning <- age_outlier_removed %>%
     mutate(months_age = age * 12) %>%
     mutate(prog_age_diff = months_age - months_programming) %>%
-    filter(prog_age_diff > 0)
+    filter(prog_age_diff > 0) %>%
+    select(-c(prog_age_diff, months_age))
 
   # Remove excess money for learning
   # Keep NA values as well
