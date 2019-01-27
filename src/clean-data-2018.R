@@ -1137,11 +1137,11 @@ main <- function(dataPath1, dataPath2) {
     mutate_at(vars(starts_with("yt_"), -yt_other),
               vchar_to_one)
 
-  # Remove outliers for age
+  # Remove outliers for age, but keep NA values
   # Oldest living is 116, so filtering on that age
   # https://en.wikipedia.org/wiki/List_of_the_oldest_living_people
   age_outlier_removed <- bool_changed_data %>%
-    filter(age < 116)
+    filter(age < 116 | is.na(age))
 
   # Remove questionable months learning by cross-checking age
   # Here, convert age to months and take the difference between age
