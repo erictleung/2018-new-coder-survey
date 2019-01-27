@@ -267,7 +267,14 @@ some of them being outliers.
 ### Check distribution of ages
 
 ```{r}
-
+raw_data %>%
+  select(`How old are you?`) %>%
+  mutate(age = `How old are you?`) %>%
+  select(age) %>%
+  group_by(age) %>%
+  add_count() %>%
+  distinct() %>%
+  arrange(desc(n))
 ```
 
 ### Check other genders
@@ -329,6 +336,18 @@ raw_data %>%
   filter(!is.na(Other_2)) %>%
   count(Other_2) %>%
   arrange()
+```
+
+### All at Once
+
+```{r}
+raw_data %>%
+  select(contains("other")) %>%
+  gather("col", "val") %>%
+  group_by(col, val) %>%
+  add_count() %>%
+  distinct() %>%
+  arrange(desc(n), val)
 ```
 
 
