@@ -21,6 +21,8 @@
 # - stringr
 library(tidyverse)
 library(here)
+library(tools)
+library(hunspell)
 
 
 # Sub-Process Functions -----------------------------------
@@ -316,14 +318,6 @@ helper_filter <- function(part, col, words, printYes = NA) {
 # Usage:
 #   > cleanPart <- clean_job_interest_other(part)
 clean_job_interest_other <- function(part) {
-  cat("Cleaning responses for other job interests...\n")
-  
-  ## Title case answers for other job interests
-  ##  See if I can simplify this by just mutating
-  jobRoleOtherYes <- part %>% filter(!is.na(JobInterestOther)) %>%
-    mutate(JobInterestOther = simple_title_case(JobInterestOther))
-  jobRoleOtherNo <- part %>% filter(is.na(JobInterestOther))
-  cleanPart <- jobRoleOtherNo %>% bind_rows(jobRoleOtherYes)
   
   ## Change uncertain job roles to "Undecided"
   undecidedWords <- c("not sure", "don't know", "not certain",
@@ -718,21 +712,21 @@ rename_data_vars <- function(dat) {
 
       # Coding events attended
       codeevnt_fcc = "freeCodeCamp study groups",
-      codeenvt_hackthn = "hackathons",
-      codeenvt_confs = "conferences",
-      codeenvt_workshps = "workshops",
-      codeenvt_startupwknd = "Startup Weekend",
-      codeenvt_nodeschl = "NodeSchool",
-      codeenvt_womenwc = "Women Who Code",
-      codeenvt_girldevit = "Girl Develop It",
-      codeenvt_coderdojo = "CoderDojo",
-      codeenvt_meetup = "Meetup.com events",
-      codeenvt_railsbrdg = "RailsBridge",
-      codeenvt_gamejam = "Game Jam",
-      codeenvt_railsgrls = "Rails Girls",
-      codeenvt_djangogrls = "Django Girls",
-      codeenvt_wkndbtcmp = "weekend bootcamps",
-      codeenvt_other = "Other_3",
+      codeevnt_hackthn = "hackathons",
+      codeevnt_confs = "conferences",
+      codeevnt_workshps = "workshops",
+      codeevnt_startupwknd = "Startup Weekend",
+      codeevnt_nodeschl = "NodeSchool",
+      codeevnt_womenwc = "Women Who Code",
+      codeevnt_girldevit = "Girl Develop It",
+      codeevnt_coderdojo = "CoderDojo",
+      codeevnt_meetup = "Meetup.com events",
+      codeevnt_railsbrdg = "RailsBridge",
+      codeevnt_gamejam = "Game Jam",
+      codeevnt_railsgrls = "Rails Girls",
+      codeevnt_djangogrls = "Django Girls",
+      codeevnt_wkndbtcmp = "weekend bootcamps",
+      codeevnt_other = "Other_3",
 
       # Podcasts listened to
       podcast_fcc = "The freeCodeCamp Podcast",
@@ -1105,7 +1099,7 @@ polish_data <- function(cleanData) {
 #   file in the `clean-data/` directory.
 # Usage:
 #   > main()
-main <- function(dataPath1, dataPath2) {
+main <- function() {
   # Read in data
   data_path <- here("raw-data", "2018-New-Coders-Survey.csv")
   dat <- data_path %>%
@@ -1126,7 +1120,7 @@ main <- function(dataPath1, dataPath2) {
               vchar_to_one) %>%
 
     # Change coding events
-    mutate_at(vars(starts_with("codeenvt_"), -codeenvt_other),
+    mutate_at(vars(starts_with("codeevnt_"), -codeevnt_other),
               vchar_to_one) %>%
 
     # Change podcasts
@@ -1167,25 +1161,70 @@ main <- function(dataPath1, dataPath2) {
   rm_high_num_kids <- remove_excess_money_spent %>%
     filter(num_children < 20 | is.na(num_children))
 
-  # Remove survey-year specific outliers
-  allXs <- part2 %>% filter(ExpectedEarning == "xxxxx")
-  part2 <- part2 %>% setdiff(allXs)
+  # Clean other columns by title casing terms
+  cleaned_other_cols <- rm_high_num_kids %>%
+    # Clean other job interests
+    mutate(job_intr_other = if_else(
+      !is.na(job_intr_other),
+      toTitleCase(job_intr_other),
+      job_intr_other)) %>%
 
-  # Make variables between datasets consistent for joining
-  consistentData <- std_data_type(part1, part2)
+    # Clean other resources used
+    mutate(rsrc_other = if_else(
+      !is.na(rsrc_other),
+      toTitleCase(rsrc_other),
+      rsrc_other)) %>%
 
-  # Clean both parts of the data
-  cleanData <- clean_part(allData)
+    # Clean other coding events
+    mutate(codeevnt_other = if_else(
+      !is.na(codeevnt_other),
+      toTitleCase(codeevnt_other),
+      codeevnt_other)) %>%
 
-  # Polish data with small changes e.g. give correct data types to columns
-  final <- polish_data(cleanData)
+    # Clean other podcasts
+    mutate(podcast_other = if_else(
+      !is.na(podcast_other),
+      toTitleCase(podcast_other),
+      podcast_other)) %>%
+
+    # Clean other YouTube channels
+    mutate(yt_other = if_else(
+      !is.na(yt_other),
+      toTitleCase(yt_other),
+      yt_other))
+
+  # Remove inconsistency in children
+  # Keep all rational combinations of children
+  #   - Doesn't have children and has 0 or didn't answer
+  #   - Has children and has 1 or more children or didn't answer
+  #   - Didn't answer either question
+  # Variables:
+  #   - num_children
+  #   - has_children
+  rm_inconsistent_kids <- cleaned_other_cols %>%
+    filter(
+      (has_children == 0 & num_children %in% c(0, NA)) |
+      (has_children == 1 & (num_children > 0 | is.na(num_children))) |
+      (is.na(has_children) & is.na(num_children))
+    )
+
+  # Remove high last year's income if greater than 1 million
+  rm_high_income <- rm_inconsistent_kids %>%
+    filter(last_yr_income < 1000000 | is.na(last_yr_income))
+
+  # Remove too quick of responses
+  rm_quick_responses <- rm_high_income %>%
+    mutate(total_time_sec = time_end - time_start) %>%
+    mutate(total_time_min = total_time_sec / 60) %>%
+    mutate(total_time_min = as.numeric(total_time_min)) %>%
+    rename(time_total_sec = total_time_sec) %>%
+    filter(time_total_sec > 100) %>%
+    select(-c(total_time_min))
+
+  # Rename to final
+  final <- rm_quick_responses
 
   # Combine data and create cleaned data
   out_path <- here("clean-data", "2018-fCC-New-Coders-Survey-Data.csv")
   write_csv(x = final, path = out_path)
-
-  write.csv(x = final,
-            file = "clean-data/2017-fCC-New-Coders-Survey-Data.csv",
-            na = "NA",
-            row.names = FALSE)
 }

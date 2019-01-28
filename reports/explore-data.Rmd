@@ -316,6 +316,19 @@ raw_data %>%
   distinct()
 ```
 
+Also check with consistency of answers.
+
+```{r}
+raw_data %>%
+  rename(num_children = `How many children do you have?`) %>%
+  rename(has_children = `Do you have children?`) %>%
+  select(has_children, num_children) %>%
+  group_by(has_children, num_children) %>%
+  count() %>%
+  distinct()
+```
+
+
 
 ### Check debt owed for home mortgage
 
