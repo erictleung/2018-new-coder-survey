@@ -1165,17 +1165,7 @@ main <- function(dataPath1, dataPath2) {
 
   # Remove high number of children
   rm_high_num_kids <- remove_excess_money_spent %>%
-    filter(num_children < 20)
-
-  # Remove irrelevant values for others
-  # - job interest
-  # - resource
-  # - coding events
-  # - podcast
-  # - YouTube
-  # - gender
-  # - employment status
-  # Remove high number of children
+    filter(num_children < 20 | is.na(num_children))
 
   # Remove survey-year specific outliers
   allXs <- part2 %>% filter(ExpectedEarning == "xxxxx")
